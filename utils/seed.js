@@ -1,7 +1,8 @@
 const connection = require("../config/connection");
 
-const { User } = require("../models");
+const { User, Thought } = require("../models");
 const { randomUN, randomEmail } = require("./randomName");
+const { randomText } = require("./lipsum");
 
 connection.on("error", (err) => err);
 
@@ -10,8 +11,10 @@ connection.once("open", async () => {
   await User.deleteMany({});
 
   const userSeedingArr = [];
+  const thoughtSeedingArr = [];
 
   const userNr = 20;
+  const thoughtNr = 40;
 
   for (let i = 0; i < userNr; i++) {
     userSeedingArr.push({
@@ -19,12 +22,20 @@ connection.once("open", async () => {
       email: randomEmail(),
     });
   }
-
   await User.collection.insertMany(userSeedingArr);
 
-  // loop through the saved applications, for each application we need to generate a application response and insert the application responses
-  console.table(userSeedingArr);
-  // console.table(applications);
+  const userArr = await User.find();
+  const userIdArr = userArr.map((singleUser) => singleUser._id.valueOf());
+
+  for (let i = 0; i < thoughtNr; i++) {
+    thoughtSeedingArr.push({
+      text: randomText(),
+      userId: userIdArr[Math.floor(Math.random() * userIdArr.length)],
+    });
+  }
+  console.log(thoughtSeedingArr);
+  await Thought.collection.insertMany(thoughtSeedingArr);
+
   console.info("Seeding complete! 🌱");
   process.exit(0);
 });
