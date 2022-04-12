@@ -1,5 +1,5 @@
-const User = require('./User');
-const Tag = require('./Tag');
-const Application = require('./Application');
+const User = require("./User");
+const Thought = require("./Thought");
+const Reaction = require("./Reaction");
 
-module.exports = { User, Application, Tag };
+module.exports = { User, Thought, Reaction };

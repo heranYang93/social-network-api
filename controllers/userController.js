@@ -1,38 +1,118 @@
-const { User, Application } = require('../models');
+const { User, Thought, Reaction } = require("../models");
 
 module.exports = {
-  // Get all users
+  // localhost:3001/api/users
+  // GET
+  // get all users
   getUsers(req, res) {
     User.find()
-      .then((users) => res.json(users))
+      .then((allUsers) => res.json(allUsers))
       .catch((err) => res.status(500).json(err));
   },
-  // Get a single user
+  // localhost:3001/api/users/:userId
+  // GET
+  // get user by id
   getSingleUser(req, res) {
     User.findOne({ _id: req.params.userId })
-      .select('-__v')
+      .select("-__v")
       .then((user) =>
         !user
-          ? res.status(404).json({ message: 'No user with that ID' })
+          ? res.status(404).json({ message: "No user with that ID" })
           : res.json(user)
       )
       .catch((err) => res.status(500).json(err));
   },
+  // localhost:3001/api/users
+  // POST
   // create a new user
+  // {username, email}
   createUser(req, res) {
     User.create(req.body)
-      .then((user) => res.json(user))
+      .then((newUser) => res.json(newUser))
       .catch((err) => res.status(500).json(err));
   },
-  // Delete a user and associated apps
-  deleteUser(req, res) {
-    User.findOneAndDelete({ _id: req.params.userId })
-      .then((user) =>
-        !user
-          ? res.status(404).json({ message: 'No user with that ID' })
-          : Application.deleteMany({ _id: { $in: user.applications } })
+  // localhost:3001/api/users/:userId
+  // PUT
+  // update a user by id
+  // {username, email, friend, thoughts}
+  updateUser(req, res) {
+    User.findOneAndUpdate(
+      { _id: req.params.userId },
+      { $set: req.body },
+      { runValidators: true, new: true }
+    )
+      .then((updatedUser) =>
+        !updatedUser
+          ? res
+              .status(404)
+              .json({ message: "No user associated with this id!" })
+          : res.json(updatedUser)
       )
-      .then(() => res.json({ message: 'User and associated apps deleted!' }))
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json(err);
+      });
+  },
+  // localhost:3001/api/users/:userId
+  // DELETE
+  // Delete a user and associated thoughts
+  deleteUser(req, res) {
+    User.findOneAndDelete({ userId: req.params.userId })
+      .then((user) => {
+        if (!user) {
+          res.status(404).json({ message: "No user associated with this id!" });
+        } else {
+          Thought.deleteMany({ thoughtId: { $in: user.thoughts } });
+        }
+      })
+      .then(() =>
+        res.json({ message: "User and associated thoughts deleted!" })
+      )
       .catch((err) => res.status(500).json(err));
+  },
+
+  // localhost:3001/api/users/:userId/:friendId
+  // POST
+  // add a friend (friendId) to a user's friend list (userId)
+  addFriend(req, res) {
+    User.findOneAndUpdate(
+      { _id: req.params.userId },
+      { $addToSet: { friends: req.params.friendId } },
+      { new: true }
+    )
+      .then((userData) =>
+        !userData
+          ? res
+              .status(404)
+              .json({ message: "No user associated with this id!" })
+          : res.json(userData)
+      )
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json(err);
+      });
+  },
+
+  // localhost:3001/api/users/:userId/:friendId
+  // DELETE
+  // remove a friend (friendId) from a user's friend list (userId)
+  // {username, email, friend, thoughts}
+  removeFriend(req, res) {
+    User.findOneAndUpdate(
+      { _id: req.params.userId },
+      { $pull: { friends: req.params.friendId } },
+      { new: true }
+    )
+      .then((userData) =>
+        !userData
+          ? res
+              .status(404)
+              .json({ message: "No user associated with this id!" })
+          : res.json(userData)
+      )
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json(err);
+      });
   },
 };
