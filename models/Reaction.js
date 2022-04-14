@@ -3,7 +3,16 @@ const { Schema } = require("mongoose");
 // Schema to create Post model
 const reactionSchema = new Schema(
   {
-    reactionText: {
+    reactionId: {
+      type: Schema.Types.ObjectId,
+      default: () => new Types.ObjectId(),
+    },
+    reactionBody: {
+      type: String,
+      required: true,
+      maxlength: 280,
+    },
+    username: {
       type: String,
       required: true,
     },

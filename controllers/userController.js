@@ -57,7 +57,7 @@ module.exports = {
   // DELETE
   // Delete a user and associated thoughts
   deleteUser(req, res) {
-    User.findOneAndDelete({ userId: req.params.userId })
+    User.findOneAndDelete({ _id: req.params.userId })
       .then((user) => {
         if (!user) {
           res.status(404).json({ message: "No user associated with this id!" });

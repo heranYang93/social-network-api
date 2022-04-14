@@ -3,17 +3,18 @@ const { reactionSchema } = require("./Reaction");
 
 const thoughtSchema = new Schema(
   {
-    text: {
+    thoughtText: {
       type: String,
       required: true,
-    },
-    userId: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
     },
     createdAt: {
       type: Date,
       default: Date.now,
+    },
+    username: {
+      type: String,
+      required: true,
+      ref: "User",
     },
     reactions: [reactionSchema],
   },
