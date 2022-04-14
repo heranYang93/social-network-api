@@ -19,30 +19,29 @@ module.exports = {
           ? res
               .status(404)
               .json({ message: "No thought associated with this ID" })
-          : res.json(application)
+          : res.json(singleThoughtData)
       )
       .catch((err) => res.status(500).json(err));
   },
   // localhost:3001/api/thoughts
   // POST
   // create a new thought
-  // {thoughtText, userId}
+  // {text, userId}
   createThought(req, res) {
     Thought.create(req.body)
       .then((thisThought) => {
         return User.findOneAndUpdate(
-          { userId: req.body.userId },
-          { $addToSet: { thoughts: thisThought.thoughtId } },
+          { _id: req.body.userId },
+          { $addToSet: { thoughts: thisThought._id } },
           { new: true }
-        );
+        ).then((result) => {
+          !result
+            ? res.status(404).json({
+                message: "Thought created, but found no user with that ID",
+              })
+            : res.json(result);
+        });
       })
-      .then((user) =>
-        !user
-          ? res.status(404).json({
-              message: "Thought created, but found no user with that ID",
-            })
-          : res.json("Created the thought 🎉")
-      )
       .catch((err) => {
         console.log(err);
         res.status(500).json(err);
@@ -52,16 +51,16 @@ module.exports = {
   // localhost:3001/api/thoughts/:thoughtId
   // PUT
   // update a thought by id
-  // {thoughtText, userId}
+  // {text, userId}
   updateThought(req, res) {
     Thought.findOneAndUpdate(
-      { thoughtId: req.params.applicationId },
+      { _id: req.params.thoughtId },
       { $set: req.body },
       { runValidators: true, new: true }
     )
       .then((updatedThoughtData) =>
         !updatedThoughtData
-          ? res.status(404).json({ message: "No application with this id!" })
+          ? res.status(404).json({ message: "No thought with this id!" })
           : res.json(updatedThoughtData)
       )
       .catch((err) => {
@@ -74,50 +73,52 @@ module.exports = {
   // DELETE
   // Delete a thought and associated reaction
   deleteThought(req, res) {
-    Thought.findOneAndRemove({ _id: req.params.applicationId })
-      .then((application) =>
-        !application
-          ? res.status(404).json({ message: "No application with this id!" })
+    Thought.findOneAndRemove({ _id: req.params.thoughtId })
+      .then((deleteResult) =>
+        !deleteResult
+          ? res.status(404).json(deleteResult)
           : User.findOneAndUpdate(
-              { applications: req.params.applicationId },
-              { $pull: { applications: req.params.applicationId } },
+              { thoughts: req.params.thoughtId },
+              { $pull: { thoughts: req.params.thoughtId } },
               { new: true }
             )
       )
-      .then((user) =>
-        !user
+      .then((updateUser) =>
+        !updateUser
           ? res.status(404).json({
-              message: "Application created but no user with this id!",
+              message: "No user associated with this thought!",
             })
-          : res.json({ message: "Application successfully deleted!" })
+          : res.json({ message: "Thought successfully deleted!" })
       )
       .catch((err) => res.status(500).json(err));
   },
-  // TODO: Add comments to the functionality of the addTag method
+
   addReaction(req, res) {
     Thought.findOneAndUpdate(
-      { _id: req.params.applicationId },
-      { $addToSet: { tags: req.body } },
+      { _id: req.params.thoughtId },
+      { $addToSet: { reactions: req.body } },
       { runValidators: true, new: true }
     )
-      .then((application) =>
-        !application
-          ? res.status(404).json({ message: "No application with this id!" })
-          : res.json(application)
+      .then((updateReaction) =>
+        !updateReaction
+          ? res
+              .status(404)
+              .json({ message: "No thought associated with this id!" })
+          : res.json(updateReaction)
       )
       .catch((err) => res.status(500).json(err));
   },
-  // TODO: Add comments to the functionality of the addTag method
+
   removeReaction(req, res) {
     Thought.findOneAndUpdate(
-      { _id: req.params.applicationId },
-      { $pull: { tags: { responseId: req.params.tagId } } },
+      { _id: req.params.thoughtId },
+      { $pull: { reactions: { reactionId: req.params.reactionId } } },
       { runValidators: true, new: true }
     )
-      .then((application) =>
-        !application
-          ? res.status(404).json({ message: "No application with this id!" })
-          : res.json(application)
+      .then((removeResult) =>
+        !removeResult
+          ? res.status(404).json({ message: "No thought with this id!" })
+          : res.json(removeResult)
       )
       .catch((err) => res.status(500).json(err));
   },

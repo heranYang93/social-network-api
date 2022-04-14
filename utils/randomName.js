@@ -72,11 +72,15 @@ const names = [
 const getRandomArrItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
 // Gets a random full name
-const randomUN = () => `${getRandomArrItem(names)}${getRandomArrItem(names)}`;
-const randomEmail = () =>
-  `${getRandomArrItem(names)}.${getRandomArrItem(names)}.${Math.floor(
-    Math.random() * 9999
-  )}@gmail.com`;
-
+const randomUser = () => {
+  const randomFirstName = `${getRandomArrItem(names)}`;
+  const randomLastName = `${getRandomArrItem(names)}`;
+  return {
+    username: `${randomFirstName} ${randomLastName}`,
+    email: `${randomFirstName.split("")[0]}.${randomLastName}.${Math.floor(
+      Math.random() * 9999
+    )}@gmail.com`,
+  };
+};
 // Export the functions for use in seed.js
-module.exports = { randomUN, randomEmail };
+module.exports = { randomUser };

@@ -1,15 +1,15 @@
-const { Schema, model } = require("mongoose");
+const { Schema } = require("mongoose");
 
 // Schema to create Post model
 const reactionSchema = new Schema(
   {
+    reactionText: {
+      type: String,
+      required: true,
+    },
     thoughtId: {
       type: Schema.Types.ObjectId,
       ref: "Thought",
-    },
-    userId: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
     },
     createdAt: {
       type: Date,
@@ -18,12 +18,10 @@ const reactionSchema = new Schema(
   },
   {
     toJSON: {
-      virtuals: true,
+      getters: true,
     },
     id: false,
   }
 );
 
-const Reaction = model("reaction", reactionSchema);
-
-module.exports = Reaction;
+module.exports = { reactionSchema };
