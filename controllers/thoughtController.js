@@ -96,7 +96,11 @@ module.exports = {
   addReaction(req, res) {
     Thought.findOneAndUpdate(
       { _id: req.params.thoughtId },
-      { $addToSet: { reactions: req.body } },
+      {
+        $addToSet: {
+          reactions: req.body,
+        },
+      },
       { runValidators: true, new: true }
     )
       .then((updateReaction) =>
@@ -112,7 +116,7 @@ module.exports = {
   removeReaction(req, res) {
     Thought.findOneAndUpdate(
       { _id: req.params.thoughtId },
-      { $pull: { reactions: { reactionId: req.params.reactionId } } },
+      { $pull: { reactions: { _id: req.params.reactionId } } },
       { runValidators: true, new: true }
     )
       .then((removeResult) =>

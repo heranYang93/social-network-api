@@ -7,10 +7,6 @@ const reactionSchema = new Schema(
       type: String,
       required: true,
     },
-    thoughtId: {
-      type: Schema.Types.ObjectId,
-      ref: "Thought",
-    },
     createdAt: {
       type: Date,
       default: Date.now,
