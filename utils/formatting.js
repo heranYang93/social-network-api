@@ -32,7 +32,7 @@ const formatting = function (timeArg) {
     28: "28th",
     29: "29th",
     30: "30th",
-    31: "31th",
+    31: "31st",
   };
   const timeStrArr = timeArg.toString().split(" ");
 
